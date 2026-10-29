@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [ {c: gcc, cxx: g++}, {c: clang, cxx: clang++} ]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Build
+      run: |
+        cmake -S . -B build -DRXSHM_WERROR=ON \
+          -DCMAKE_C_COMPILER=${{ matrix.compiler.c }} -DCMAKE_CXX_COMPILER=${{ matrix.compiler.cxx }}
+        cmake --build build -j
+    - name: Test
+      run: ctest --test-dir build --output-on-failure
+
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [ "3.10", "3.12" ]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint ./python
+    - name: Lint
+      run: pylint python/rxshm tests
+    - name: Test
+      run: python -m unittest -v

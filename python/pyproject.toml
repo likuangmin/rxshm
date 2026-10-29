@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rxshm"
+dynamic = ["version"]
+description = "SDR samples in shared memory: a ring a capture writes, other processes read live"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+classifiers = ["Operating System :: POSIX :: Linux"]
+
+[tool.setuptools]
+packages = ["rxshm"]
+
+[tool.setuptools.dynamic]
+version = {attr = "rxshm.__version__"}
