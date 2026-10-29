@@ -83,6 +83,11 @@ To append `n` bytes (whole samples, at most `ring_bytes`), the writer:
 3. Stores the new `write_count` with release ordering (one aligned 64-bit
    store), then `heartbeat_ns`.
 
+A writer may store fewer bytes in step 3 than it announced in step 1 (a C
+writer committing less than it reserved): `write_end` then stays ahead of
+`write_count` until its next write, and readers drop a little more than
+they need to, which is safe.
+
 It never waits for readers (but see Lockstep): bytes older than
 `write_count + n - ring_bytes` are overwritten. A write longer than the
 ring goes in pieces of at most `ring_bytes`, or keeps only its last
